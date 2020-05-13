@@ -1,6 +1,6 @@
 import { getCustomRepository, getRepository } from 'typeorm';
 
-// import AppError from '../errors/AppError';
+import AppError from '../errors/AppError';
 
 import Transaction from '../models/Transaction';
 import Category from '../models/Category';
@@ -39,6 +39,19 @@ class CreateTransactionService {
     }
 
     const transactionsRepository = getCustomRepository(TransactionRepository);
+
+    const balance = await transactionsRepository.getBalance();
+
+    if (balance.income === 0 && type === 'outcome') {
+      throw new AppError(
+        'You need a first income transaction to start spend money',
+        401,
+      );
+    }
+
+    if (balance.outcome + value > balance.income && type === 'outcome') {
+      throw new AppError("You should not spend money you don't have", 400);
+    }
 
     const transaction = transactionsRepository.create({
       title,
