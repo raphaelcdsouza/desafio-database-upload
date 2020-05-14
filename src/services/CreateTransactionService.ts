@@ -49,7 +49,7 @@ class CreateTransactionService {
       );
     }
 
-    if (balance.outcome + value > balance.income && type === 'outcome') {
+    if (balance.total < value && type === 'outcome') {
       throw new AppError("You should not spend money you don't have", 400);
     }
 
